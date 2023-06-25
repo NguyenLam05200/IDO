@@ -14,7 +14,7 @@
 ```sh
   cd client
   npm i
-  yarn dev
+  "yarn dev" hoặc "npm run dev"
 ```
 ## 📃 Init truffle
 
