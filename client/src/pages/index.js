@@ -20,7 +20,7 @@ export default function Home() {
         }}
         className="w-full h-[100vh] items-center flex flex-col bg-cover bg-center"
       >
-        <BannerLogo className="mt-[80px]" />
+        <BannerLogo className="mt-[60px]" />
 
         <div className="mt-[180px] w-full flex">
           <div className="flex flex-col items-end justify-end w-1/2 pr-[160px]">
