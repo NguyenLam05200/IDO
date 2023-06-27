@@ -44,7 +44,13 @@ body {
   font-size: 17px;
 }
 
-.custom-tuong {
-  padding: 200px;
+.t-campaigns {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.t-campaigns-list {
+  flex: 1;
 }
 

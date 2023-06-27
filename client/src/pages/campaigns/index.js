@@ -1,24 +1,41 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import Button from "@/components/Button/Button";
 import OnlyClient from "@/layouts/OnlyClient";
 import { useRouter } from "next/router";
+import { Box, Button, Card, CardActions, CardContent, Typography } from "@mui/material";
+import ButtonCustom from "@/components/Button/Button";
 
-const PRO = [{ id: 1, name: "Campain 1" }];
+const CampaignList = [{ id: '012345678davaefefe', name: "Campaign 1" }, { id: 'djdahdddlahskshoii11hh3kl11j13l1', name: "Campaign 2" }, { id: 'dvvvhđhlahskshoii11hh3kl11j13l1', name: "Campaign 3" }];
 export default function Campaigns() {
   const projects = useSelector((state) => state.project.projects);
-  const router =  useRouter();
+  const router = useRouter();
 
   return (
     <OnlyClient>
-      <div className="pt-[200px] bg-black">
-        Hello from Campaigns page: {projects}
-        {PRO.map((eachProject) => (
-          <div className="bg-[#50d71e]" key={eachProject.id}>
-            <h1 className="text-3xl font-bold">{eachProject.name}</h1>
-            <Button onClick={() => router.push('/campaigns/details')}>Hello world</Button>
-          </div>
-        ))}
+      <div className="t-campaigns p-[20px]">
+        <div className="t-campaigns-list">
+          <Typography variant="h5">
+            Hello from Campaigns page: {projects}
+          </Typography>
+          {CampaignList.map((eachProject) => (
+            <Card sx={{ maxWidth: 900 }} className="mb-[20px]">
+              <CardContent className="pb-[0px]">
+                <Typography gutterBottom variant="h6" component="div">
+                  {eachProject.name}
+                </Typography>
+                <Typography variant="body" color="black">
+                  {eachProject.id}
+                </Typography>
+              </CardContent>
+              <CardActions>
+                <Button size="medium" href="./campaigns/details">View Detail</Button>
+              </CardActions>
+            </Card>
+          ))}
+        </div>
+        <div className="p-[20px]">
+          <ButtonCustom onClick={ () => router.push('./new-campaign')} className="max-w-fit p-[10px]">Create a Campaign</ButtonCustom>
+        </div>
       </div>
     </OnlyClient>
   );
