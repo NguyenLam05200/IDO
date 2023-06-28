@@ -1,11 +1,33 @@
+import Button from "@/components/Button/Button";
 import OnlyClient from "@/layouts/OnlyClient";
 import { Card, CardContent, Typography } from "@mui/material";
+import { useForm } from "react-hook-form";
 
 export default function details() {
+
+  const { register, handleSubmit } = useForm();
+  const onSubmit = data => console.log(data);
+
   return (
     <OnlyClient>
-      <div className="grid grid-cols-2 gap-4 p-[20px]">
+      <Typography variant="h4" className="t-title">Campaign Detail 📚</Typography>
+      <div className="grid grid-cols-2 gap-16 p-[20px]">
         <div className="grid grid-cols-2 gap-4">
+          {/* Campaign's name */}
+          <Card>
+            <CardContent>
+              <Typography variant="h5" component="div">
+                Name - cần DL
+              </Typography>
+              <Typography sx={{ mb: 1.5 }} color="text.secondary">
+                Campaign's name
+              </Typography>
+              <Typography variant="body">
+                Purpose - Cần DL
+              </Typography>
+            </CardContent>
+          </Card>
+
           {/* Address of Manager */}
           <Card>
             <CardContent>
@@ -82,9 +104,15 @@ export default function details() {
           </Card>
         </div>
         <div>
-          Contributed
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Typography variant="h6" className="font-bold">Amount to contribute (Ethereum)</Typography>
+            <input type="number" className="t-input" defaultValue="" {...register("amountEther")} />
+
+            <Button className="max-w-xs p-[10px]" type="submit">Contribute ➕➕➕</Button>
+          </form>
         </div>
       </div>
+      <Button className="max-w-xs p-[10px] m-[20px]" onClick={() => router.push('./requests')}>Request 🧾</Button>
     </OnlyClient>
   );
 }
