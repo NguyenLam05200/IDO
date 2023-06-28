@@ -12,6 +12,7 @@ export default function Campaigns() {
 
   return (
     <OnlyClient>
+    <Typography variant="h4" className="t-title">Campaign List 📚</Typography>
       <div className="t-campaigns p-[20px]">
         <div className="t-campaigns-list">
           <Typography variant="h5">
@@ -28,7 +29,7 @@ export default function Campaigns() {
                 </Typography>
               </CardContent>
               <CardActions>
-                <Button size="medium" href="./campaigns/details">View Detail</Button>
+                <Button size="medium" href="./campaigns/slug">View Detail</Button>
               </CardActions>
             </Card>
           ))}

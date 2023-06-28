@@ -3,7 +3,7 @@ import OnlyClient from "@/layouts/OnlyClient";
 import { Card, CardContent, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 
-export default function details() {
+export default function Details() {
 
   const { register, handleSubmit } = useForm();
   const onSubmit = data => console.log(data);
@@ -112,7 +112,7 @@ export default function details() {
           </form>
         </div>
       </div>
-      <Button className="max-w-xs p-[10px] m-[20px]" onClick={() => router.push('./requests')}>Request 🧾</Button>
+      <Button className="max-w-xs p-[10px] m-[20px]" onClick={() => router.push('./campaigns/[...slug]/requests')}>Request 🧾</Button>
     </OnlyClient>
   );
 }
