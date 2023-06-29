@@ -1,16 +1,21 @@
 import Button from "@/components/Button/Button";
 import OnlyClient from "@/layouts/OnlyClient";
 import { Card, CardContent, Typography } from "@mui/material";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 
 export default function Details() {
-
   const { register, handleSubmit } = useForm();
-  const onSubmit = data => console.log(data);
+  const onSubmit = (data) => console.log(data);
+  const router = useRouter();
+  const { slug } = router.query;
+  console.log("_______", slug);
 
   return (
     <OnlyClient>
-      <Typography variant="h4" className="t-title">Campaign Detail 📚</Typography>
+      <Typography variant="h4" className="t-title">
+        Campaign Detail 📚
+      </Typography>
       <div className="grid grid-cols-2 gap-16 p-[20px]">
         <div className="grid grid-cols-2 gap-4">
           {/* Campaign's name */}
@@ -22,9 +27,7 @@ export default function Details() {
               <Typography sx={{ mb: 1.5 }} color="text.secondary">
                 Campaign's name
               </Typography>
-              <Typography variant="body">
-                Purpose - Cần DL
-              </Typography>
+              <Typography variant="body">Purpose - Cần DL</Typography>
             </CardContent>
           </Card>
 
@@ -38,7 +41,8 @@ export default function Details() {
                 Address of Manager
               </Typography>
               <Typography variant="body">
-                The manager who created this campaign can create a requests to withdraw funds.
+                The manager who created this campaign can create a requests to
+                withdraw funds.
               </Typography>
             </CardContent>
           </Card>
@@ -68,7 +72,9 @@ export default function Details() {
                 Number of requests
               </Typography>
               <Typography variant="body">
-                A request with the purpose of trying to withdraw money from the contract. Requests must be approved by at least 50% approver first.
+                A request with the purpose of trying to withdraw money from the
+                contract. Requests must be approved by at least 50% approver
+                first.
               </Typography>
             </CardContent>
           </Card>
@@ -105,14 +111,33 @@ export default function Details() {
         </div>
         <div>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <Typography variant="h6" className="font-bold">Amount to contribute (Ethereum)</Typography>
-            <input type="number" className="t-input" defaultValue="" {...register("amountEther")} />
+            <Typography variant="h6" className="font-bold">
+              Amount to contribute (Ethereum)
+            </Typography>
+            <input
+              type="number"
+              className="t-input"
+              defaultValue=""
+              {...register("amountEther")}
+            />
 
-            <Button className="max-w-xs p-[10px]" type="submit">Contribute ➕➕➕</Button>
+            <Button className="max-w-xs p-[10px]" type="submit">
+              Contribute ➕➕➕
+            </Button>
           </form>
         </div>
       </div>
-      <Button className="max-w-xs p-[10px] m-[20px]" onClick={() => router.push('./campaigns/[...slug]/requests')}>Request 🧾</Button>
+      <Button
+        className="max-w-xs p-[10px] m-[20px]"
+        onClick={() =>
+          router.push({
+            pathname: "/campaigns/[slug]/requests",
+            query: { slug: slug },
+          })
+        }
+      >
+        Request 🧾
+      </Button>
     </OnlyClient>
   );
 }
