@@ -19,6 +19,7 @@ export const CampaignList = [
 ];
 export default function Campaigns() {
     const projects = useSelector((state) => state.project.projects);
+    console.log("__________projects: ", projects);
     const router = useRouter();
 
     return (

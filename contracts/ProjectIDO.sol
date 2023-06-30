@@ -53,6 +53,7 @@ contract Token {
 contract ProjectIDO {
     struct Project {
         Token token;
+        address createdBy;
         string title;
         string description;
         uint256 minContribute;
@@ -65,6 +66,7 @@ contract ProjectIDO {
     mapping(uint256 => Project) public projects;
     uint256[] public projectIds; // Store the IDs of all projects
     uint256 public projectId;
+    event ProjectCreated(uint256 projectId); // Declare the event
 
     function createProject(
         string memory _title,
@@ -81,11 +83,15 @@ contract ProjectIDO {
         Token token = new Token(_tokenName, _tokenSymbol, _tokenInitialSupply);
 
         // Store the address of the Token contract in the project
+        projects[projectId].createdBy = msg.sender;
         projects[projectId].token = token;
         projects[projectId].title = _title;
         projects[projectId].description = _description;
         projects[projectId].minContribute = _minContribute;
         projects[projectId].raiseTarget = _raiseTarget;
+
+        // Emit the event with the project ID
+        emit ProjectCreated(projectId);
 
         // Add the project ID to the projectIds array
         projectIds.push(projectId);
@@ -99,20 +105,51 @@ contract ProjectIDO {
         external
         view
         returns (
-            Token,
+            address,
+            string memory,
+            string memory,
+            uint256,
             uint256,
             address[] memory,
-            uint256
+            uint256,
+            Token
         )
     {
         Project storage project = projects[_projectId];
         return (
-            project.token,
+            project.createdBy,
+            project.title,
+            project.description,
+            project.minContribute,
             project.raiseTarget,
             project.contributorAddresses,
-            project.totalContributedETH
+            project.totalContributedETH,
+            project.token
         );
     }
 
     // Rest of the contract...
+    function invest(uint256 _projectId) external payable {
+        Project storage project = projects[_projectId];
+        require(msg.value >= project.minContribute, "Contribution amount below minimum");
+
+        // Update the contributor's contribution amount
+        project.contributions[msg.sender] += msg.value;
+        // Update the total contributed ETH
+        project.totalContributedETH += msg.value;
+
+        // Add the contributor's address to the list if it doesn't exist
+        if (project.contributions[msg.sender] == 0) {
+            project.contributorAddresses.push(msg.sender);
+        }
+    }
+
+    function withdrawFunds(uint256 _projectId, uint256 _amount) external {
+        Project storage project = projects[_projectId];
+        require(project.createdBy == msg.sender, "Only project creator can withdraw funds");
+        require(project.totalContributedETH >= _amount, "Insufficient funds");
+
+        payable(msg.sender).transfer(_amount);
+        project.totalContributedETH -= _amount;
+    }
 }

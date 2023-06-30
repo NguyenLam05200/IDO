@@ -12,7 +12,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -48,7 +49,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     }
   ],
   "metadata": "{\"compiler\":{\"version\":\"0.8.13+commit.abaa5c0e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"retrieve\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"num\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"_test\",\"type\":\"string\"}],\"name\":\"store\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"test\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"retrieve()\":{\"details\":\"Return value \",\"returns\":{\"_0\":\"value of 'number'\"}},\"store(uint256,string)\":{\"details\":\"Store value in variable\",\"params\":{\"num\":\"value to store\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/SimpleStorage.sol\":\"SimpleStorage\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/SimpleStorage.sol\":{\"keccak256\":\"0x7de8df7077f3a70e041b4918c2fff19908e5e25307e78256290f8cfbedde1f26\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://52cc4d19558a69d673885cd0ed59f51e337ece4797d31fb17379b2b4f627440d\",\"dweb:/ipfs/QmVqVzLU8j9VwkeB4bTv55ij33FxZXn8myEiSVZGJwZyZd\"]}},\"version\":1}",
@@ -3972,12 +3974,13 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0xDB162a77c9E09622C08E84e6d36BD3D693C20441",
-      "transactionHash": "0x15d9907b5a2877694f4b8a278446fc0d071778766ef3c85d076f2905cd7b5e78"
+      "address": "0x23b4bE1FFc38b4EDA83f7E93243c45C6fE8FF9AF",
+      "transactionHash": "0xb011bec41be8fb19e56996e4240c8a2974cc15e7c7556e6b7e8ee17d4304a182"
     }
   },
   "schemaVersion": "3.4.14",
-  "updatedAt": "2023-06-30T01:46:42.921Z",
+  "updatedAt": "2023-06-30T11:50:34.091Z",
+  "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
     "methods": {

@@ -3,43 +3,44 @@ import NextBreadcrumbs from "@/components/breadcrums";
 import { CampaignList } from "@/pages/campaigns";
 import { Box, Container } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 const OnlyClient = ({ children }) => {
-    const [mount, setMount] = useState(false);
+  const [mount, setMount] = useState(false);
+  const projects = useSelector((state) => state.project.projects);
 
-    const getDefaultTextGenerator = useCallback((subpath) => {
-        console.log("______________" + subpath);
-        return {
-            [subpath]: subpath,
-        }[subpath];
-    }, []);
+  console.log("_____________projects: ", projects);
+//   const getDefaultTextGenerator = useCallback((subpath) => {
+//     return {
+//       [subpath]: subpath,
+//     }[subpath];
+//   }, []);
 
-    const getTextGenerator = useCallback((param, query) => {
-        return {
-            slug: () =>
-                CampaignList.find((campaign) => campaign.id === query.slug) //Chỉnh sửa cho phù hợp data
-                    .name,
-        }[param];
-    }, []);
+//   const getTextGenerator = useCallback((param, query) => {
+//     return {
+//       slug: () =>
+//         projects.find((obj) => obj.projectid === query.slug).title, // Chỉnh sửa cho phù hợp data
+//     }[param];
+//   }, []);
 
-    useEffect(() => {
-        setMount(true);
-    }, []);
-    if (!mount) return null;
-    return (
-        <>
-            <ResponsiveAppBar />
-            <Container maxWidth="lg">
-                <Box sx={{ my: 3 }}>
-                    <NextBreadcrumbs
-                        getDefaultTextGenerator={getDefaultTextGenerator}
-                        getTextGenerator={getTextGenerator}
-                    />
-                </Box>
-                {children}
-            </Container>
-        </>
-    );
+  useEffect(() => {
+    setMount(true);
+  }, []);
+  if (!mount) return null;
+  return (
+    <>
+      <ResponsiveAppBar />
+      <Container maxWidth="lg">
+        <Box sx={{ my: 3 }}>
+          {/* <NextBreadcrumbs
+            getDefaultTextGenerator={getDefaultTextGenerator}
+            getTextGenerator={getTextGenerator}
+          /> */}
+        </Box>
+        {children}
+      </Container>
+    </>
+  );
 };
 
 export default OnlyClient;

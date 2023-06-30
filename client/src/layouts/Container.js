@@ -43,10 +43,14 @@ const Container = ({ children }) => {
 
               const formattedProject = {
                 projectId: Number(projectId),
-                tokenAddress: projectDetails[0],
-                raiseTarget: Number(projectDetails[1]),
-                contributorAddresses: projectDetails[2],
-                totalContributedETH: Number(projectDetails[3]),
+                createdBy: projectDetails[0],
+                title: projectDetails[1],
+                description: projectDetails[2],
+                minContribute: Number(projectDetails[3]),
+                raiseTarget: Number(projectDetails[4]),
+                contributorAddresses: projectDetails[5],
+                totalContributedETH: Number(projectDetails[6]),
+                tokenAddress: projectDetails[7],
               };
 
               projects.push(formattedProject);
@@ -63,7 +67,7 @@ const Container = ({ children }) => {
           selectedAccount = accounts[0];
           console.log(`Selected account changed to ${selectedAccount}`);
         });
-      } 
+      }
       setIsInitialized(true);
     };
     initProvider();
@@ -77,74 +81,3 @@ const Container = ({ children }) => {
 };
 
 export default Container;
-
-// useEffect(() => {
-//   let provider = window.ethereum;
-
-//   if (typeof provider !== "undefined") {
-//     //Metamask is installed
-//     provider
-//       .request({ method: "eth_requestAccounts" })
-//       .then(async (accounts) => {
-//         const selectedAccount = accounts[0];
-//         console.log(`Selected account is ${selectedAccount}`);
-
-//         const web3 = new Web3(provider);
-//         const networkId = await web3.eth.net.getId();
-//         const deployedNetwork = ProjectIDO.networks[networkId];
-
-//         // Contract instance
-//         const contract = new web3.eth.Contract(
-//           ProjectIDO.abi,
-//           deployedNetwork.address
-//         );
-
-//         // Call create project here
-
-//         const projectIds = await contract.methods.getProjectIds().call();
-//         console.log("Project IDs:", projectIds);
-
-//         const projects = [];
-
-//         for (let i = 0; i < projectIds.length; i++) {
-//           const projectId = projectIds[i];
-//           const projectDetails = await contract.methods
-//             .getProjectDetails(projectId)
-//             .call();
-
-//           const formattedProject = {
-//             projectId,
-//             tokenAddress: projectDetails[0],
-//             raiseTarget: Number(projectDetails[1]),
-//             contributorAddresses: projectDetails[2],
-//             totalContributedETH: Number(projectDetails[3]),
-//           };
-
-//           projects.push(formattedProject);
-//         }
-
-//         dispatch(initState({methods: contract, projects: projects}))
-
-//         // interact with ProjectIDO contract
-
-//         // Call the createProject function
-//         // const name = "My Project";
-//         // const symbol = "MP";
-//         // const initialSupply = 10000;
-//         // const raiseTarget = 10;
-
-//         // contract.methods
-//         //   .createProject(name, symbol, initialSupply, raiseTarget)
-//         //   .send({ from: selectedAccount }, function (err, res) {
-//         //     if (err) {
-//         //       console.log("An error occurred", err);
-//         //       return;
-//         //     }
-//         //     console.log("Hash of the transaction: " + res);
-//         //   });
-//       })
-//       .catch((err) => {
-//         console.log(err);
-//       });
-//   }
-// }, []);
