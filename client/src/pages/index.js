@@ -4,6 +4,7 @@ import Button from "@/components/Button/Button";
 import GradientButton from "@/components/Button/GradientButton";
 import Link from "next/link";
 import { BannerLogo } from "@/components/svg/SvgIcon";
+import { useSelector } from "react-redux";
 
 const inter = Inter({ subsets: ["latin"] });
 

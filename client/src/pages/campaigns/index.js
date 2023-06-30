@@ -25,7 +25,7 @@ export default function Campaigns() {
         <OnlyClient>
             <div className="flex items-end justify-between mb-8">
                 <Typography variant="h5" className="font-semibold">
-                    Recent projects: {projects}
+                    {/* Recent projects: {projects} */}
                 </Typography>
                 <ButtonCustom
                     onClick={() => router.push("./new-campaign")}

@@ -8,20 +8,22 @@ pragma solidity ^0.8.13;
 
 contract SimpleStorage {
 	uint256 number;
+    string public test;
 
     /**
      * @dev Store value in variable
      * @param num value to store
      */
-    function store(uint256 num) public {
+    function store(uint256 num, string memory _test) public {
         number += num;
+        test = _test;
     }
 
     /**
      * @dev Return value 
      * @return value of 'number'
      */
-    function retrieve() public view returns (uint256){
-        return number;
+    function retrieve() public view returns (uint256, string memory){
+        return (number, test);
     }
 }
