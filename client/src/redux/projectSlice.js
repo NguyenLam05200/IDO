@@ -57,7 +57,7 @@ export const getProjectDetails = async ({ projectId }, cb) => {
           minContribute: Number(projectDetails[3]),
           raiseTarget: Number(projectDetails[4]),
           contributorAddresses: projectDetails[5],
-          totalContributedETH: Number(projectDetails[6]),
+          totalContributedETH: Number(projectDetails[6]) / 10 ** 18,
           tokenAddress: projectDetails[7],
         };
 
@@ -97,6 +97,43 @@ export const contribute = async (projectId, amount) => {
         .send({ from: account, value: Web3.utils.toWei(amount, "ether") });
 
       return invested;
+    }
+  } catch (e) {
+    console.log("____e: ", e);
+    if (e.code === 100) {
+      //user rejected the transaction
+      console.log("user rejected the transaction");
+    }
+  }
+};
+
+export const withdrawFunds = async (projectId, amount, reason) => {
+  console.log("___________amount: ", amount);
+  let provider = window.ethereum;
+  const web3 = new Web3(provider);
+  try {
+    if (typeof provider !== "undefined") {
+      await provider.request({
+        method: "eth_requestAccounts",
+      });
+
+      const accounts = await web3.eth.getAccounts();
+      const account = accounts[0];
+
+      const networkId = await web3.eth.net.getId();
+      const deployedNetwork = ProjectIDO.networks[networkId];
+
+      // Contract instance
+      const contract = new web3.eth.Contract(
+        ProjectIDO.abi,
+        deployedNetwork.address
+      );
+
+      const withdrawRequest = await contract.methods
+        .withdrawFunds(projectId, Web3.utils.toWei(amount, "ether"), reason)
+        .send({ from: account });
+
+      return withdrawRequest;
     }
   } catch (e) {
     console.log("____e: ", e);

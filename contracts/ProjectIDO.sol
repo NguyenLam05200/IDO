@@ -51,6 +51,14 @@ contract Token {
 }
 
 contract ProjectIDO {
+    struct WithdrawalRequest {
+        address requester;     // Address of the requester
+        uint256 amount;        // Amount of ETH requested for withdrawal
+        string reason;         // Reason for the withdrawal
+        uint256 timestamp;   // Timestamp when the request was made
+        // bytes32 transactionHash; // Transaction hash of the withdrawal
+    }
+
     struct Project {
         Token token;
         address createdBy;
@@ -61,6 +69,7 @@ contract ProjectIDO {
         address[] contributorAddresses; // Store the addresses of contributors
         mapping(address => uint256) contributions; // Store the contribution amounts
         uint256 totalContributedETH;
+        WithdrawalRequest[] withdrawalRequests;
     }
 
     mapping(uint256 => Project) public projects;
@@ -144,12 +153,28 @@ contract ProjectIDO {
         }
     }
 
-    function withdrawFunds(uint256 _projectId, uint256 _amount) external {
+    function withdrawFunds(uint256 _projectId, uint256 _amount, string memory _reason) external {
         Project storage project = projects[_projectId];
         require(project.createdBy == msg.sender, "Only project creator can withdraw funds");
         require(project.totalContributedETH >= _amount, "Insufficient funds");
 
+        // Create a new withdrawal request
+        WithdrawalRequest memory request = WithdrawalRequest({
+            requester: msg.sender,
+            amount: _amount,
+            reason: _reason,
+            timestamp: block.timestamp
+            // transactionHash: bytes32(0) // Initialize with zero
+        });
+
+        // Add the withdrawal request to the corresponding project
+        project.withdrawalRequests.push(request);
+
         payable(msg.sender).transfer(_amount);
         project.totalContributedETH -= _amount;
+    }
+
+    function getWithdrawalRequests(uint256 _projectId) external view returns (WithdrawalRequest[] memory) {
+        return projects[_projectId].withdrawalRequests;
     }
 }

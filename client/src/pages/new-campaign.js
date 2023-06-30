@@ -132,7 +132,7 @@ export default function NewCampaign({}) {
       title: "Education in web3",
       description:
         "Building an system educate for all student in the world, real, public and sharing.",
-      minContribute: Web3.utils.toWei(0.01, "wei"),
+      minContribute: Web3.utils.toWei(0.01, "ether"),
       raiseTarget: 10,
       tokenName: "Edu3",
       tokenSymbol: "Education web3",

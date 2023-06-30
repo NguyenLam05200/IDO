@@ -100,7 +100,7 @@ export default function Details() {
       >
         {project.title}
       </Typography>
-      <div className="grid md:grid-cols-2 grid-cols-1 !w-full">
+      <div className="grid md:grid-cols-2 grid-cols-1 !w-full mb-12">
         <div className="flex flex-col gap-8 !w-full">
           {/* Address of Manager */}
           <Typography variant="h6" color={indigo[800]}>
@@ -167,6 +167,7 @@ export default function Details() {
                 type="number"
                 className="t-input"
                 defaultValue=""
+                step={0.0001}
                 {...register("amountEther")}
               />
 
