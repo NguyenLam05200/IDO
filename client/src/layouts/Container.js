@@ -3,7 +3,7 @@ import Web3 from "web3";
 
 import ProjectIDO from "../contracts/ProjectIDO.json";
 import { useDispatch } from "react-redux";
-import { initializeState } from "@/redux/projectSlice";
+import { formatDetailProject, initializeState } from "@/redux/projectSlice";
 
 const Container = ({ children }) => {
   const dispatch = useDispatch();
@@ -41,17 +41,7 @@ const Container = ({ children }) => {
                 .getProjectDetails(projectId)
                 .call();
 
-              const formattedProject = {
-                projectId: Number(projectId),
-                createdBy: projectDetails[0],
-                title: projectDetails[1],
-                description: projectDetails[2],
-                minContribute: Number(projectDetails[3]),
-                raiseTarget: Number(projectDetails[4]),
-                contributorAddresses: projectDetails[5],
-                totalContributedETH: Number(projectDetails[6]),
-                tokenAddress: projectDetails[7],
-              };
+              const formattedProject = formatDetailProject(projectId, projectDetails) 
 
               projects.push(formattedProject);
             }

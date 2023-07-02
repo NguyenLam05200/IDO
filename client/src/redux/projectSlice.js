@@ -22,6 +22,45 @@ export const { addProject, getProjects, initializeState } =
 
 export default projectSlice.reducer;
 
+export const formatDetailProject = (projectId, projectDetails) => {
+  return {
+    projectId: Number(projectId),
+    createdBy: projectDetails[0],
+    title: projectDetails[1],
+    description: projectDetails[2],
+    minContribute: Web3.utils.fromWei(projectDetails[3], "ether"),
+    raiseTarget: Web3.utils.fromWei(projectDetails[4], "ether"),
+    contributorAddresses: projectDetails[5],
+    totalContributedETH: Number(projectDetails[6]) / 10 ** 18,
+    tokenAddress: projectDetails[7],
+    tokenName: projectDetails[8],
+    tokenSymbol: projectDetails[9],
+    tokenImage: projectDetails[10],
+    isCompleted: projectDetails[11],
+  };
+};
+
+export const formatRequest = (input) => {
+  return {
+    requester: input[0],
+    amount: Web3.utils.fromWei(input[1], "ether"),
+    reason: input[2],
+    time: Number(input[3]),
+  };
+};
+
+function extractErrorMessage(errorString) {
+  try {
+    const start = errorString.indexOf('reason":"') + 9;
+    const end = errorString.indexOf('"', start);
+    const errorMessage = errorString.slice(start, end);
+
+    return errorMessage;
+  } catch (error) {
+    return "Somthing wrong!";
+  }
+}
+
 export const getProjectDetails = async ({ projectId }, cb) => {
   if (!projectId) return null;
 
@@ -47,24 +86,12 @@ export const getProjectDetails = async ({ projectId }, cb) => {
           .getProjectDetails(projectId)
           .call();
 
-        console.log("________-projectDetails: ", projectDetails);
-
-        const formattedProject = {
-          projectId: Number(projectId),
-          createdBy: projectDetails[0],
-          title: projectDetails[1],
-          description: projectDetails[2],
-          minContribute: Number(projectDetails[3]),
-          raiseTarget: Number(projectDetails[4]),
-          contributorAddresses: projectDetails[5],
-          totalContributedETH: Number(projectDetails[6]) / 10 ** 18,
-          tokenAddress: projectDetails[7],
-        };
-
+        const formattedProject = formatDetailProject(projectId, projectDetails);
+        console.log("_____formattedProject: ", formattedProject);
         cb(formattedProject);
       })
       .catch((err) => {
-        console.log(err);
+        console.log(typeof err, err);
         return;
       });
   }
@@ -99,11 +126,8 @@ export const contribute = async (projectId, amount) => {
       return invested;
     }
   } catch (e) {
-    console.log("____e: ", e);
-    if (e.code === 100) {
-      //user rejected the transaction
-      console.log("user rejected the transaction");
-    }
+    console.log("____e: ", extractErrorMessage(e.message));
+    return { isError: true, reason: extractErrorMessage(e?.message) };
   }
 };
 
@@ -137,9 +161,48 @@ export const withdrawFunds = async (projectId, amount, reason) => {
     }
   } catch (e) {
     console.log("____e: ", e);
-    if (e.code === 100) {
-      //user rejected the transaction
-      console.log("user rejected the transaction");
-    }
+    return { isError: true, reason: extractErrorMessage(e?.message) };
+  }
+};
+
+export const getProjectRequest = async (projectId, cb) => {
+  if (!projectId) return null;
+
+  let provider = window.ethereum;
+  let selectedAccount;
+
+  if (typeof provider !== "undefined") {
+    provider
+      .request({ method: "eth_requestAccounts" })
+      .then(async (accounts) => {
+        selectedAccount = accounts[0];
+
+        const web3 = new Web3(provider);
+        const networkId = await web3.eth.net.getId();
+        const deployedNetwork = ProjectIDO.networks[networkId];
+
+        // Contract instance
+        const contract = new web3.eth.Contract(
+          ProjectIDO.abi,
+          deployedNetwork.address
+        );
+        const projectRequests = await contract.methods
+          .getWithdrawalRequests(projectId)
+          .call();
+        console.log("____projectRequests: ", projectRequests);
+        if (!projectRequests || projectRequests.length === 0) return [];
+
+        const listFormated = [];
+        for (const request of projectRequests) {
+          console.log("____request: ", request);
+          listFormated.push(formatRequest(request));
+        }
+        console.log("______projectRequest: ", listFormated);
+        cb(listFormated);
+      })
+      .catch((err) => {
+        console.log(typeof err, err);
+        return;
+      });
   }
 };

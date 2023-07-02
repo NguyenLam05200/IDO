@@ -1,23 +1,34 @@
 import Button from "@/components/Button/Button";
 import OnlyClient from "@/layouts/OnlyClient";
 import { withdrawFunds } from "@/redux/projectSlice";
-import { Typography } from "@mui/material";
+import { Snackbar, Typography } from "@mui/material";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 export default function NewRequest() {
   const router = useRouter();
   const { slug } = router.query;
   const { register, handleSubmit, reset } = useForm();
+  const [isError, setIsError] = useState("");
+
   const onSubmit = async (data) => {
     const { description, value } = data;
     const x = await withdrawFunds(slug, value, description);
-    console.log(x);
-    // reset();
+    if (x?.isError) setIsError(x.reason);
+    else {
+      // getProjectDetails({ projectId: slug }, (obj) => setProject(obj));
+    }
   };
 
   return (
     <OnlyClient>
+      <Snackbar
+        open={isError}
+        autoHideDuration={6000}
+        onClose={() => setIsError("")}
+        message={isError}
+      />
       <div className="h-[calc(100vh-88px)]">
         <Typography variant="h4" gutterBottom className="font-semibold">
           New Request

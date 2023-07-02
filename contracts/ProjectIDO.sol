@@ -1,42 +1,43 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-
 contract Token {
-    string public name;
-    string public symbol;
     uint256 public totalSupply;
     uint256 public lockedAmount; // Số lượng token bị khóa
-    bool public tokenLocked; // Cờ để kiểm tra trạng thái khóa token
     mapping(address => uint256) public balances;
 
-    constructor(string memory _name, string memory _symbol, uint256 _initialSupply) {
-        name = _name;
-        symbol = _symbol;
+    struct TokenMetadata {
+        string name;
+        string symbol;
+        string image; // Trường lưu trữ đường dẫn hoặc mã hash của ảnh
+    }
+
+    TokenMetadata public metadata;
+
+    constructor(string memory _name, string memory _symbol, uint256 _initialSupply, string memory _image) {
+        metadata = TokenMetadata({
+            name: _name,
+            symbol: _symbol,
+            image: _image
+        });
+        // ...
+        balances[msg.sender] = _initialSupply;
         totalSupply = _initialSupply;
         balances[msg.sender] = _initialSupply;
         lockedAmount = _initialSupply; // Số lượng token bị khóa ban đầu là toàn bộ totalSupply
-        tokenLocked = true; // Ban đầu token bị khóa
     }
 
+    function getMetadata() public view returns (string memory, string memory, string memory) {
+        return (metadata.name, metadata.symbol, metadata.image);
+    }
 
     function transfer(address _to, uint256 _amount) public {
-        require(!tokenLocked, "Token is locked"); // Kiểm tra trạng thái khóa token
         require(balances[msg.sender] >= _amount, "Insufficient balance");
         balances[msg.sender] -= _amount;
         balances[_to] += _amount;
     }
 
-    function unlockToken() public {
-        require(tokenLocked, "Token is already unlocked");
-        tokenLocked = false; // Mở khóa token
-        balances[msg.sender] -= lockedAmount; // Giảm số lượng token bị khóa từ tài khoản của người tạo
-        balances[address(this)] += lockedAmount; // Tăng số lượng token bị khóa vào tài khoản Smart Contract
-        lockedAmount = 0; // Đặt số lượng token bị khóa về 0
-    }
-
     function distributeTokens(address[] memory _investors, uint256[] memory _amounts) public {
-        require(!tokenLocked, "Token is locked");
         require(_investors.length == _amounts.length, "Invalid input");
 
         for (uint256 i = 0; i < _investors.length; i++) {
@@ -60,6 +61,7 @@ contract ProjectIDO {
     }
 
     struct Project {
+        bool isCompleted;
         Token token;
         address createdBy;
         string title;
@@ -84,12 +86,13 @@ contract ProjectIDO {
         uint256 _raiseTarget,
         string memory _tokenName,
         string memory _tokenSymbol,
-        uint256 _tokenInitialSupply
+        uint256 _tokenInitialSupply,
+        string memory _tokenImage
     ) external {
         projectId++;
 
         // Deploy a new Token contract
-        Token token = new Token(_tokenName, _tokenSymbol, _tokenInitialSupply);
+        Token token = new Token(_tokenName, _tokenSymbol, _tokenInitialSupply, _tokenImage);
 
         // Store the address of the Token contract in the project
         projects[projectId].createdBy = msg.sender;
@@ -98,6 +101,7 @@ contract ProjectIDO {
         projects[projectId].description = _description;
         projects[projectId].minContribute = _minContribute;
         projects[projectId].raiseTarget = _raiseTarget;
+        projects[projectId].isCompleted = false;
 
         // Emit the event with the project ID
         emit ProjectCreated(projectId);
@@ -110,37 +114,53 @@ contract ProjectIDO {
         return projectIds;
     }
 
+    struct ProjectDetails {
+        address createdBy;
+        string title;
+        string description;
+        uint256 minContribute;
+        uint256 raiseTarget;
+        address[] contributorAddresses;
+        uint256 totalContributedETH;
+        Token token;
+        string tokenName;
+        string tokenSymbol;
+        string tokenImage;
+        bool isCompleted;
+    }
+
     function getProjectDetails(uint256 _projectId)
         external
         view
-        returns (
-            address,
-            string memory,
-            string memory,
-            uint256,
-            uint256,
-            address[] memory,
-            uint256,
-            Token
-        )
+        returns (ProjectDetails memory)
     {
         Project storage project = projects[_projectId];
-        return (
-            project.createdBy,
-            project.title,
-            project.description,
-            project.minContribute,
-            project.raiseTarget,
-            project.contributorAddresses,
-            project.totalContributedETH,
-            project.token
-        );
+        Token token = project.token;
+        (string memory name, string memory symbol, string memory image) = token.getMetadata();
+
+        ProjectDetails memory details;
+        details.createdBy = project.createdBy;
+        details.title = project.title;
+        details.description = project.description;
+        details.minContribute = project.minContribute;
+        details.raiseTarget = project.raiseTarget;
+        details.contributorAddresses = project.contributorAddresses;
+        details.totalContributedETH = project.totalContributedETH;
+        details.token = project.token;
+        details.tokenName = name;
+        details.tokenSymbol = symbol;
+        details.tokenImage = image;
+        details.isCompleted = project.isCompleted;
+
+        return details;
     }
 
-    // Rest of the contract...
     function invest(uint256 _projectId) external payable {
         Project storage project = projects[_projectId];
+        require(msg.sender != project.createdBy, "Project creator cannot invest");
         require(msg.value >= project.minContribute, "Contribution amount below minimum");
+        require(project.contributions[msg.sender] == 0, "Address has already invested");
+        require(project.totalContributedETH < project.raiseTarget, "Project already complete");
 
         // Update the contributor's contribution amount
         project.contributions[msg.sender] += msg.value;
@@ -148,8 +168,32 @@ contract ProjectIDO {
         project.totalContributedETH += msg.value;
 
         // Add the contributor's address to the list if it doesn't exist
-        if (project.contributions[msg.sender] == 0) {
-            project.contributorAddresses.push(msg.sender);
+        project.contributorAddresses.push(msg.sender);
+
+        // Check if the raise target is reached
+        if (project.totalContributedETH >= project.raiseTarget) {
+            project.isCompleted = true; // Set the project as completed
+            distributeLockedTokens(_projectId);
+        }
+    }
+
+    function distributeLockedTokens(uint256 _projectId) internal {
+        Project storage project = projects[_projectId];
+        require(project.contributorAddresses.length > 0, "No contributors");
+
+        // Get the Token contract address from the project
+        Token token = project.token;
+
+        // Get the lockedAmount from the Token contract
+        uint256 lockedAmount = token.lockedAmount();
+
+        // Calculate the token distribution per contributor
+        uint256 tokensToDistribute = lockedAmount / project.contributorAddresses.length;
+
+        // Distribute tokens to each contributor
+        for (uint256 i = 0; i < project.contributorAddresses.length; i++) {
+            address contributor = project.contributorAddresses[i];
+            token.transfer(contributor, tokensToDistribute);
         }
     }
 

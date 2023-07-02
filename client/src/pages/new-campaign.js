@@ -18,6 +18,7 @@ const createProject = async ({
   tokenName,
   tokenSymbol,
   tokenInitialSupply,
+  tokenImage,
 }) => {
   if (
     !title ||
@@ -26,7 +27,8 @@ const createProject = async ({
     !raiseTarget ||
     !tokenName ||
     !tokenSymbol ||
-    !tokenInitialSupply
+    !tokenInitialSupply ||
+    !tokenImage
   )
     return "Missing input fields";
 
@@ -58,7 +60,8 @@ const createProject = async ({
           raiseTarget,
           tokenName,
           tokenSymbol,
-          tokenInitialSupply
+          tokenInitialSupply,
+          tokenImage
         )
         .send({ from: account });
 
@@ -78,7 +81,7 @@ const createProject = async ({
   // web3.eth.net
   //   .isListening()
   //   .then(async () => {
-      
+
   //   })
   //   .catch((e) => console.log("Wow. Something went wrong: " + e));
 };
@@ -119,6 +122,11 @@ const ListInput = [
     name: "tokenInitialSupply",
     type: "number",
   },
+  {
+    label: "Token Image URL",
+    name: "tokenImage",
+    type: "text",
+  },
 ];
 
 export default function NewCampaign({}) {
@@ -128,19 +136,30 @@ export default function NewCampaign({}) {
   const router = useRouter();
 
   const onSubmit = async (data) => {
+    console.log("_____data: ", data);
+    const {
+      description,
+      minContribute,
+      raiseTarget,
+      title,
+      tokenInitialSupply,
+      tokenName,
+      tokenSymbol,
+      tokenImage
+    } = data;
+
     const createdProject = await createProject({
-      title: "Education in web3",
-      description:
-        "Building an system educate for all student in the world, real, public and sharing.",
-      minContribute: Web3.utils.toWei(0.01, "ether"),
-      raiseTarget: 10,
-      tokenName: "Edu3",
-      tokenSymbol: "Education web3",
-      tokenInitialSupply: 10000,
+      title,
+      description,
+      minContribute: Web3.utils.toWei(minContribute, "ether"),
+      raiseTarget: Web3.utils.toWei(raiseTarget, "ether"),
+      tokenName,
+      tokenSymbol,
+      tokenInitialSupply,
+      tokenImage
     });
 
-    console.log("_______-createdProject: ", createdProject, isObject(createdProject), typeof createdProject);
-
+    // console.log("_______-createdProject: ", createdProject, isObject(createdProject), typeof createdProject);
 
     if (isObject(createdProject)) {
       router.push(`/campaigns/${projects.length + 1}`);
@@ -172,6 +191,7 @@ export default function NewCampaign({}) {
                 {item.label}
               </Typography>
               <input
+              step={0.00001}
                 type={item.type}
                 className="t-input !mb-0"
                 defaultValue=""

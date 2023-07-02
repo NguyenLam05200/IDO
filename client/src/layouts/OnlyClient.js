@@ -9,19 +9,26 @@ const OnlyClient = ({ children }) => {
   const [mount, setMount] = useState(false);
   const projects = useSelector((state) => state.project.projects);
 
-  console.log("_____________projects: ", projects);
-//   const getDefaultTextGenerator = useCallback((subpath) => {
-//     return {
-//       [subpath]: subpath,
-//     }[subpath];
-//   }, []);
+  const getDefaultTextGenerator = useCallback((subpath) => {
+    return {
+      [subpath]: subpath,
+    }[subpath];
+  }, []);
 
-//   const getTextGenerator = useCallback((param, query) => {
-//     return {
-//       slug: () =>
-//         projects.find((obj) => obj.projectid === query.slug).title, // Chỉnh sửa cho phù hợp data
-//     }[param];
-//   }, []);
+  const getTextGenerator = useCallback((param, query) => {
+    return {
+      slug: () =>
+        {
+          const x = projects.find((obj) => {
+            return obj.projectId + '' === query.slug
+          })
+
+          console.log(x);
+
+          return x?.title ?? query.slug
+        }, // Chỉnh sửa cho phù hợp data
+    }[param];
+  }, []);
 
   useEffect(() => {
     setMount(true);
@@ -32,10 +39,10 @@ const OnlyClient = ({ children }) => {
       <ResponsiveAppBar />
       <Container maxWidth="lg">
         <Box sx={{ my: 3 }}>
-          {/* <NextBreadcrumbs
+          <NextBreadcrumbs
             getDefaultTextGenerator={getDefaultTextGenerator}
             getTextGenerator={getTextGenerator}
-          /> */}
+          />
         </Box>
         {children}
       </Container>

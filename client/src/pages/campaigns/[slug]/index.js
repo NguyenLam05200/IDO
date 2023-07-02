@@ -2,10 +2,13 @@ import Button from "@/components/Button/Button";
 import OnlyClient from "@/layouts/OnlyClient";
 import { contribute, getProjectDetails } from "@/redux/projectSlice";
 import {
+  Alert,
   Card,
   CardContent,
   Divider,
+  Snackbar,
   Stack,
+  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -30,19 +33,19 @@ const project = {
 const DataRow = [
   {
     text: "Number of approvers",
-    value: project?.contributorAddresses?.length ?? 0,
+    value: (project) => project?.contributorAddresses?.length ?? 0,
     tooltipText:
       "The number of people who have already donated to this campaign.",
   },
   {
     text: "Number of requests",
-    value: project?.numberOfRequests,
+    value: (project) => project?.numberOfRequests,
     tooltipText:
       "A request with the purpose of trying to withdraw money from the contract. Requests must be approved by at least 50% approver first.",
   },
   {
     text: "Campaign balance (ether)",
-    value: project?.totalContributedETH ?? 0,
+    value: (project) => project?.totalContributedETH ?? 0,
     tooltipText: "AIt stands for how much money this campaign has accumulated.",
   },
 ];
@@ -67,7 +70,6 @@ const StatisticRow = ({ text, value, tooltipText }) => {
   );
 };
 
-
 export default function Details() {
   const { register, handleSubmit } = useForm();
   const router = useRouter();
@@ -79,29 +81,85 @@ export default function Details() {
     getProjectDetails({ projectId: slug }, (obj) => setProject(obj));
   }, [slug]);
 
+  const [isError, setIsError] = useState("");
+
   const onSubmit = async (data) => {
     // console.log("__data: ", data.amountEther);
     const x = await contribute(slug, data.amountEther);
+    if (x?.isError) setIsError(x.reason);
+    else {
+      getProjectDetails({ projectId: slug }, (obj) => setProject(obj));
+    }
     // console.log("______x: ", x, data);
   };
 
-  console.log("___________cur project: ", project);
-
   return (
     <OnlyClient>
+      {/* <Snackbar
+        open={isError}
+        autoHideDuration={10000}
+        onClose={() => setIsError("")}
+      >
+        <Alert severity="error">{isError}</Alert>
+      </Snackbar> */}
+      <Snackbar
+        open={isError}
+        autoHideDuration={6000}
+        onClose={() => setIsError("")}
+        message={isError}
+      />
       <Head>
         <title>{project.title}</title>
       </Head>
-      <Typography
-        variant="h3"
-        variantMapping="h1"
-        color={indigo[900]}
-        gutterBottom
-      >
-        {project.title}
-      </Typography>
-      <div className="grid md:grid-cols-2 grid-cols-1 !w-full mb-12">
-        <div className="flex flex-col gap-8 !w-full">
+
+      <div className="flex items-end justify-between mb-12">
+        <Typography
+          variant="h3"
+          variantMapping="h1"
+          color={indigo[900]}
+          gutterBottom
+          className="!mb-0"
+        >
+          {project.title}
+        </Typography>
+        <form className="mt-8" onSubmit={handleSubmit(onSubmit)}>
+          {/* <Typography variant="h6" className="font-bold">
+            Amount to contribute (Ethereum)
+          </Typography> */}
+          <Stack direction="row" spacing={1}>
+            {/* <input
+              type="number"
+              className="t-input"
+              defaultValue=""
+              step={0.0001}
+              {...register("amountEther")}
+            /> */}
+            <TextField
+              size="small"
+              inputProps={{
+                maxLength: 13,
+                step: "0.000001",
+              }}
+              className="!w-[300px]"
+              id="amountEther"
+              label="Amount in ETH"
+              variant="outlined"
+              type="number"
+              {...register("amountEther")}
+            />
+
+            <Button
+              className="max-w-xs !h-auto !py-[2px] !px-[30px] !w-auto"
+              type="submit"
+            >
+              Contribute ➕➕➕
+            </Button>
+          </Stack>
+        </form>
+      </div>
+
+      <div className="!w-full mb-12 grid grid-cols-1 md:grid-cols-5 gap-8 grid-rows-1">
+        <div className="flex flex-col gap-8 !w-full col-span-2">
           {/* Address of Manager */}
           <Typography variant="h6" color={indigo[800]}>
             Address of Manager
@@ -130,52 +188,36 @@ export default function Details() {
             You must contribute at lease this wei to become a approver.
           </Typography>
         </div>
-        <div className="flex flex-col !w-full md:mt-0 mt-8">
-          <Card sx={{ minWidth: 300 }} className="!w-full shadow-sm">
-            <CardContent>
-              <Typography variant="caption">Fundraise Goal</Typography>
-              <Typography variant="h2" color={red[900]} gutterBottom>
-                {toUSD(project.raiseTarget)}
-              </Typography>
-              {DataRow.map((row) => (
-                <StatisticRow
-                  text={row.text}
-                  value={row.value}
-                  tooltipText={row.tooltipText}
-                  key={row.text}
-                />
-              ))}
-              <Button
-                className="w-full p-[10px] mt-6"
-                onClick={() =>
-                  router.push({
-                    pathname: "/campaigns/[slug]/requests",
-                    query: { slug: slug },
-                  })
-                }
-              >
-                Request 🧾
-              </Button>
-            </CardContent>
-          </Card>
-          <form className="mt-8" onSubmit={handleSubmit(onSubmit)}>
-            <Typography variant="h6" className="font-bold">
-              Amount to contribute (Ethereum)
-            </Typography>
-            <Stack direction="row" spacing={1}>
-              <input
-                type="number"
-                className="t-input"
-                defaultValue=""
-                step={0.0001}
-                {...register("amountEther")}
-              />
 
-              <Button className="max-w-xs p-[10px]" type="submit">
-                Contribute ➕➕➕
-              </Button>
-            </Stack>
-          </form>
+        <div className="flex flex-col !w-full md:mt-0 mt-8 col-span-3 h-full">
+          <Card
+            sx={{ minWidth: 300 }}
+            className="!w-full h-full shadow-sm flex flex-col justify-between p-8"
+          >
+            <Typography variant="h5">Fundraise Goal</Typography>
+            <Typography variant="h2" color={red[900]} gutterBottom>
+              {toUSD(project.raiseTarget)}
+            </Typography>
+            {DataRow.map((row) => (
+              <StatisticRow
+                text={row.text}
+                value={row.value(project)}
+                tooltipText={row.tooltipText}
+                key={row.text}
+              />
+            ))}
+            <Button
+              className="w-full p-[10px] mt-6"
+              onClick={() =>
+                router.push({
+                  pathname: "/campaigns/[slug]/requests",
+                  query: { slug: slug },
+                })
+              }
+            >
+              Request 🧾
+            </Button>
+          </Card>
         </div>
       </div>
     </OnlyClient>
